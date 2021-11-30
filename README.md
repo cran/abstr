@@ -50,10 +50,6 @@ U.S.
 ``` r
 library(abstr)
 library(tmap) # for map making
-#> Registered S3 methods overwritten by 'stars':
-#>   method             from
-#>   st_bbox.SpatRaster sf  
-#>   st_crs.SpatRaster  sf
 tm_shape(montlake_zones) + tm_polygons(col = "grey") +
   tm_shape(montlake_buildings) + tm_polygons(col = "blue")  +
 tm_style("classic")
@@ -139,13 +135,13 @@ schema](https://a-b-street.github.io/docs/tech/dev/formats/scenarios.html).
 
 ``` r
 output_json = ab_json(output_sf, time_fun = ab_time_normal, scenario_name = "Montlake Example")
-ab_save(output_json, f = "montlake_scenarios.json")
+ab_save(output_json, f = "montlake.json")
 ```
 
 Let’s see what is in the file:
 
 ``` r
-file.edit("ab_scenario.json")
+file.edit("montlake.json")
 ```
 
 The first trip schedule should look something like this, matching [A/B
@@ -212,23 +208,35 @@ not necessary for any integration with the `abstr` package.
 
 If you’re generating many JSON scenarios, you might not want to manually
 use A/B Street’s user interface to import each file. You can instead run
-a command.
+a command to do the import. See the docs at
+[a-b-street.github.io/docs/tech/dev/](https://a-b-street.github.io/docs/tech/dev/index.html)
+for details, but the basic steps are:
 
 1.  Install the [latest
     build](https://a-b-street.github.io/docs/user/index.html) of A/B
     Street for your platform, or [build from
     source](https://a-b-street.github.io/docs/tech/dev/index.html).
-2.  From the main A/B Street directory, run the following command:
+2.  From the main A/B Street repo directory import the scenario
+
+These steps can be achieved by running the following lines of code (run
+the commented lines of code to install Rust, clone the A/B Street repo
+and set the working directory, you can also replace `../montlake.json`
+with a different path to the scenario file):
 
 ``` bash
-./cli import-scenario --input path/to/scenario.json --map data/system/us/seattle/maps/montlake.bin
+# curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh # install rust
+# git clone git@github.com:a-b-street/abstreet
+# cd abstreet
+# cargo run --bin updater -- download --minimal
+cargo run --bin cli -- import-scenario --input ../montlake.json --map data/system/us/seattle/maps/montlake.bin
+cargo run --bin game --release
 ```
 
 If you’re using Windows, you’ll instead run `cli.exe`. If you’re
 building from source use the following command:
 
 ``` bash
-cargo run --release --bin cli -- import-scenario --input path/to/scenario.json --map data/system/us/seattle/maps/montlake.bin
+cargo run --release --bin cli -- import-scenario --input path/to/montlake.json --map data/system/us/seattle/maps/montlake.bin
 ```
 
 ## Next steps

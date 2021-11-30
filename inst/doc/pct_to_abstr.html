@@ -145,7 +145,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <div id="introduction" class="section level1">
 <h1>Introduction</h1>
-<p>The <code>abstr</code> package was originally developed as part of the ActDev project, a tool that provides evidence on active travel provision and potential in and around planned and proposed development sites. <!-- Todo: cite  --> <!-- the Active Travel Orientated Development paper by Talbot et al. (2021): this study assessed the active travel prevision of new and proposed housing development sites in England and Wales. --> The <a href="https://actdev.cyipt.bike/">ActDev</a> website demonstrates the potential for new developments to support walking and cycling by visualising data generated using reproducible R <a href="https://github.com/cyipt/actdev/tree/main/code">code</a>. A key challenge was to create a simulation for each of the case study sites based on the input origin-destination datasets. To overcome this challenge, A/B Street developers were commissioned to extend the ActDev tool to enable real time simulation of scenarios of change. At the time there was no way to get the OD data we had in the R world into the A/B Street world. This was motivation for creating the <code>abstr</code> R package. As outlined in the package’s README, the package’s main job is to take origin-destination data from <code>.csv</code> files (and other tabular file types) and outputs <code>.json</code> files that can be imported and visualised in A/B Street.</p>
+<p>The <code>abstr</code> package was originally developed as part of the ActDev project, which involved the development of a prototype web application that provides evidence on active travel provision and potential in and around planned and proposed development sites, as outlined in a <a href="https://osf.io/7fuq5/">paper</a> describing the tool. The <a href="https://actdev.cyipt.bike/">ActDev</a> website demonstrates the potential for new developments to support walking and cycling by visualising data generated using reproducible R <a href="https://github.com/cyipt/actdev/tree/main/code">code</a>. A key challenge was to create a simulation for each of the case study sites based on the input origin-destination datasets. To overcome this challenge, A/B Street developers were commissioned to extend the ActDev tool to enable real time simulation of scenarios of change. At the time there was no way to get the OD data we had in the R world into the A/B Street world. This was motivation for creating the <code>abstr</code> R package. As outlined in the package’s README, the package’s main job is to take origin-destination data from <code>.csv</code> files (and other tabular file types) and outputs <code>.json</code> files that can be imported and visualised in A/B Street.</p>
 <p>Given you have all of the above, you are ready to start transforming data-frames into simulations! So lets set an aim for the vignette</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="do">####</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="do">####</span></span>
@@ -165,7 +165,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h1>Installing and Loading Packages</h1>
 <p>To begin with, you need to install and load the necessary packages for this vignette.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="do">#### INSTALL PACKAGES ####</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>cran_pkgs <span class="ot">=</span> <span class="fu">c</span>(<span class="st">&quot;abstr&quot;</span>,<span class="st">&quot;pct&quot;</span>,<span class="st">&quot;osmextract&quot;</span>,<span class="st">&quot;sf&quot;</span>,<span class="st">&quot;tidyverse&quot;</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>cran_pkgs <span class="ot">=</span> <span class="fu">c</span>(<span class="st">&quot;abstr&quot;</span>, <span class="st">&quot;pct&quot;</span>, <span class="st">&quot;osmextract&quot;</span>, <span class="st">&quot;sf&quot;</span>, <span class="st">&quot;tidyverse&quot;</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>remotes<span class="sc">::</span><span class="fu">install_cran</span>(cran_pkgs)</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="do">#### LOAD PACKAGES ####</span></span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(abstr)</span>
@@ -177,40 +177,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="choosing-a-region" class="section level1">
 <h1>Choosing a region</h1>
 <p>Data in the PCT for England and Wales is divided into regions, which can be seen below.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>pct<span class="sc">::</span>pct_regions<span class="sc">$</span>region_name</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [1] &quot;london&quot;                       &quot;greater-manchester&quot;          </span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [3] &quot;liverpool-city-region&quot;        &quot;south-yorkshire&quot;             </span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [5] &quot;north-east&quot;                   &quot;west-midlands&quot;               </span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [7] &quot;warwickshire&quot;                 &quot;west-yorkshire&quot;              </span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [9] &quot;cheshire&quot;                     &quot;lancashire&quot;                  </span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [11] &quot;humberside&quot;                   &quot;north-yorkshire&quot;             </span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [13] &quot;derbyshire&quot;                   &quot;leicestershire&quot;              </span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [15] &quot;nottinghamshire&quot;              &quot;hereford-and-worcester&quot;      </span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [17] &quot;shropshire&quot;                   &quot;staffordshire&quot;               </span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [19] &quot;avon&quot;                         &quot;devon&quot;                       </span></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [21] &quot;dorset&quot;                       &quot;wiltshire&quot;                   </span></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [23] &quot;cambridgeshire&quot;               &quot;bedfordshire&quot;                </span></span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [25] &quot;essex&quot;                        &quot;kent&quot;                        </span></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [27] &quot;berkshire&quot;                    &quot;buckinghamshire&quot;             </span></span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [29] &quot;east-sussex&quot;                  &quot;hampshire&quot;                   </span></span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [31] &quot;isle-of-wight&quot;                &quot;cornwall-and-isles-of-scilly&quot;</span></span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [33] &quot;cumbria&quot;                      &quot;gloucestershire&quot;             </span></span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [35] &quot;hertfordshire&quot;                &quot;lincolnshire&quot;                </span></span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [37] &quot;norfolk&quot;                      &quot;northamptonshire&quot;            </span></span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [39] &quot;northumberland&quot;               &quot;oxfordshire&quot;                 </span></span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [41] &quot;somerset&quot;                     &quot;suffolk&quot;                     </span></span>
-<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [43] &quot;surrey&quot;                       &quot;west-sussex&quot;                 </span></span>
-<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [45] &quot;wales&quot;</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>pct_regions<span class="sc">$</span>region_name</span></code></pre></div>
 <p>To run the example below, replace <code>devon</code> with a different region from the list above (warning, this may not work for large regions).</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>region_name <span class="ot">=</span> <span class="st">&quot;devon&quot;</span></span></code></pre></div>
 <p>You can select a specific local authority of interest from those available in the region of interest. You can check which are available in your region of interest as follows:</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>lookup <span class="ot">=</span> pct<span class="sc">::</span>pct_regions_lookup</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(lookup<span class="sc">$</span>lad16nm[lookup<span class="sc">$</span>region_name <span class="sc">==</span> region_name])</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  East Devon      Exeter   Mid Devon North Devon    Plymouth  South Hams </span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;           1           1           1           1           1           1 </span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Teignbridge    Torridge  West Devon </span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;           1           1           1</span></span></code></pre></div>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(lookup<span class="sc">$</span>lad16nm[lookup<span class="sc">$</span>region_name <span class="sc">==</span> region_name])</span></code></pre></div>
 <p>For the purposes of this article we will use Exeter as the case study:</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>lad_name <span class="ot">=</span> <span class="st">&quot;Exeter&quot;</span></span></code></pre></div>
 </div>
@@ -375,6 +347,9 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="do">#### SAVE JSON FILE ####</span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>output_json <span class="ot">=</span> <span class="fu">ab_json</span>(output_sf, <span class="at">time_fun =</span> ab_time_normal, <span class="at">scenario_name =</span> <span class="st">&quot;Go Dutch&quot;</span>)</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ab_save</span>(output_json, <span class="at">f =</span> <span class="st">&quot;dutch.json&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Upload the json file for future reference</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>piggyback<span class="sc">::</span><span class="fu">pb_upload</span>(<span class="st">&quot;dutch.json&quot;</span>)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>piggyback<span class="sc">::</span><span class="fu">pb_download_url</span>(<span class="st">&quot;dutch.json&quot;</span>)</span></code></pre></div>
 </div>
 <div id="importing-scenario-files-into-ab-street" class="section level1">
 <h1>Importing scenario files into A/B Street</h1>
@@ -397,8 +372,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>This vignette is by no means simple, and if you get stuck please raise an issue in the <a href="https://github.com/a-b-street/abstr/issues">Github</a>. If you succeed in generating a simulation for chosen city please share it on social media tagging the authors <code>abstr</code> so we can see how you have used the methods/data. If you are looking to extend this work presented in this vignette, why not try:</p>
 <ul>
 <li>building a simulation with a different uptake model</li>
-<li>integrating school commute data from the PCT package</li>
-<li>build your own uptake model</li>
+<li>exploring route network data representing cycling potential to schools from the PCT package</li>
+<li>creating your own uptake model (see the <a href="https://itsleeds.github.io/pct/articles/getting.html"><code>getting</code></a> vignette from the <code>pct</code> R package)</li>
 </ul>
 </div>
 

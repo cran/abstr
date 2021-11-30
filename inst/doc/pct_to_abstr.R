@@ -1,10 +1,11 @@
-## ---- include = FALSE---------------------------------------------------------
+## ---- include=FALSE-----------------------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  eval = FALSE
 )
 
-## ----eval=FALSE---------------------------------------------------------------
+## -----------------------------------------------------------------------------
 #  ####
 #  ####
 #  #### AIM: Use PCT data to create scenario of change where commuting cycling levels increase and car journeys decrease which can be imported
@@ -12,9 +13,9 @@ knitr::opts_chunk$set(
 #  ####
 #  ####
 
-## ----eval=FALSE---------------------------------------------------------------
+## -----------------------------------------------------------------------------
 #  #### INSTALL PACKAGES ####
-#  cran_pkgs = c("abstr","pct","osmextract","sf","tidyverse")
+#  cran_pkgs = c("abstr", "pct", "osmextract", "sf", "tidyverse")
 #  remotes::install_cran(cran_pkgs)
 #  #### LOAD PACKAGES ####
 #  library(abstr)
@@ -24,19 +25,19 @@ knitr::opts_chunk$set(
 #  library(dplyr)
 
 ## -----------------------------------------------------------------------------
-pct::pct_regions$region_name
+#  pct_regions$region_name
 
 ## -----------------------------------------------------------------------------
-region_name = "devon"
+#  region_name = "devon"
 
 ## -----------------------------------------------------------------------------
-lookup = pct::pct_regions_lookup
-table(lookup$lad16nm[lookup$region_name == region_name])
+#  lookup = pct::pct_regions_lookup
+#  table(lookup$lad16nm[lookup$region_name == region_name])
 
 ## -----------------------------------------------------------------------------
-lad_name = "Exeter"
+#  lad_name = "Exeter"
 
-## ----eval=FALSE---------------------------------------------------------------
+## -----------------------------------------------------------------------------
 #  ####    READ DATA ####
 #  devon_zones = get_pct_zones(region = region_name, geography = "msoa") # get zone data
 #  # filter for exeter
@@ -46,7 +47,7 @@ lad_name = "Exeter"
 #  exeter_commute_od = get_pct_lines(region = region_name, geography = "msoa") %>%
 #    filter(lad_name1 == lad_name & lad_name2 == lad_name) # filter for exeter
 
-## ----eval=FALSE---------------------------------------------------------------
+## -----------------------------------------------------------------------------
 #  exeter_commute_od = exeter_commute_od %>%
 #    mutate(cycle_base = bicycle) %>%
 #    mutate(walk_base = foot) %>%
@@ -79,12 +80,12 @@ lad_name = "Exeter"
 #      pcycle_godutch
 #    )
 
-## ----eval=FALSE---------------------------------------------------------------
+## -----------------------------------------------------------------------------
 #  # sanity check: ensure total remains the same
 #  # (this is not a dynamic model where population change is factored in)
 #  identical(exeter_commute_od$all_base, exeter_commute_od$all_go_dutch)
 
-## ----eval=FALSE---------------------------------------------------------------
+## -----------------------------------------------------------------------------
 #  ####    DOWNLOAD OSM BUILDING DATA ####
 #  osm_polygons = osmextract::oe_read(
 #    "https://download.geofabrik.de/europe/great-britain/england/devon-latest.osm.pbf",
@@ -140,7 +141,7 @@ lad_name = "Exeter"
 #  
 #  exeter_osm_buildings_all = osm_buildings_valid[exeter_zones, ]
 
-## ----eval = FALSE-------------------------------------------------------------
+## -----------------------------------------------------------------------------
 #  ####  JOIN OSM BUILDINGS WITH ZONE DATA ####
 #  exeter_osm_buildings_all_joined = exeter_osm_buildings_all %>%
 #    sf::st_join(exeter_zones)
@@ -151,7 +152,7 @@ lad_name = "Exeter"
 #  exeter_osm_buildings_tbl = exeter_osm_buildings_all %>%
 #    filter(osm_way_id %in% exeter_osm_buildings_sample$osm_way_id)
 
-## ----eval = FALSE-------------------------------------------------------------
+## -----------------------------------------------------------------------------
 #  set.seed(2021) # for reproducible builds
 #  ####  LOGIC GATE ####
 #  # Logic gate for go_dutch scenario of change, where cycling levels increase to a proportion reflecting the Netherlands.
@@ -175,7 +176,7 @@ lad_name = "Exeter"
 #      select(geo_code1, geo_code2, All, Bike, Transit, Drive, Walk, geometry)
 #  }
 
-## ----eval = FALSE-------------------------------------------------------------
+## -----------------------------------------------------------------------------
 #  ####  GENERATE A/B STREET SCENARIO ####
 #  output_sf = ab_scenario(
 #    od = exeter_od,
@@ -189,12 +190,12 @@ lad_name = "Exeter"
 #    modes = c("Walk", "Bike", "Drive", "Transit")
 #  )
 
-## ----eval = FALSE-------------------------------------------------------------
+## -----------------------------------------------------------------------------
 #  #### SAVE JSON FILE ####
 #  output_json = ab_json(output_sf, time_fun = ab_time_normal, scenario_name = "Go Dutch")
 #  ab_save(output_json, f = "dutch.json")
 
-## ---- eval=FALSE, echo=FALSE--------------------------------------------------
+## -----------------------------------------------------------------------------
 #  # Upload the json file for future reference
 #  piggyback::pb_upload("dutch.json")
 #  piggyback::pb_download_url("dutch.json")
